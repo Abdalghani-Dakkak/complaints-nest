@@ -1,0 +1,24 @@
+# Render Blueprint — deploys the complaints API web service.
+# Reuses the existing IAM PostgreSQL (free tier allows only one DB),
+# so there is no `databases:` block here. DATABASE_URL / JWT_SECRET / IAM_URL
+# are set in the Render dashboard (sync: false) to avoid committing secrets.
+# Deploy: push to GitHub, then New + → Blueprint → pick this repo.
+
+services:
+  - type: web
+    name: complaints-nest
+    runtime: node
+    plan: free
+    region: frankfurt # MUST match the IAM DB region for the internal hostname to resolve
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    healthCheckPath: / # the @Public() health route
+    envVars:
+      - key: DATABASE_URL
+        sync: false # paste the IAM database connection string in the dashboard
+      - key: JWT_SECRET
+        sync: false # MUST match IAM's JWT_SECRET exactly
+      - key: IAM_URL
+        sync: false # e.g. https://iam-nest-wr3k.onrender.com
+      - key: NODE_VERSION
+        value: "22"

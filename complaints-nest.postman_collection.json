@@ -1,0 +1,201 @@
+{
+  "info": {
+    "name": "Complaints Nest API",
+    "_postman_id": "complaints-nest-collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "iamUrl",        "value": "https://iam-nest-wr3k.onrender.com" },
+    { "key": "complaintsUrl", "value": "http://localhost:3001" },
+    { "key": "token",         "value": "" }
+  ],
+  "item": [
+    {
+      "name": "0 - Auth",
+      "item": [
+        {
+          "name": "Login (complaints.admin only)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.access_token) {",
+                  "  pm.collectionVariables.set('token', res.access_token);",
+                  "  console.log('Token saved');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{complaintsUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"your@email.com\",\n  \"password\": \"yourpassword\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "1 - Categories",
+      "item": [
+        {
+          "name": "Get all categories",
+          "request": {
+            "method": "GET",
+            "url": "{{complaintsUrl}}/categories",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Get one category",
+          "request": {
+            "method": "GET",
+            "url": "{{complaintsUrl}}/categories/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Create category [complaints.delete]",
+          "request": {
+            "method": "POST",
+            "url": "{{complaintsUrl}}/categories",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Infrastructure\",\n  \"arabicName\": \"البنية التحتية\",\n  \"description\": \"Roads, electricity, water\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Update category [complaints.delete]",
+          "request": {
+            "method": "PATCH",
+            "url": "{{complaintsUrl}}/categories/1",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isActive\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete category [complaints.delete]",
+          "request": {
+            "method": "DELETE",
+            "url": "{{complaintsUrl}}/categories/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 - Requests",
+      "item": [
+        {
+          "name": "Submit request [complaints.create]",
+          "request": {
+            "method": "POST",
+            "url": "{{complaintsUrl}}/requests",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryId\": 1,\n  \"type\": \"complaint\",\n  \"subject\": \"Broken road near main street\",\n  \"description\": \"The road has a large pothole causing accidents\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get all requests [complaints.view_all]",
+          "request": {
+            "method": "GET",
+            "url": "{{complaintsUrl}}/requests",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Get my requests [complaints.view_own]",
+          "request": {
+            "method": "GET",
+            "url": "{{complaintsUrl}}/requests/my",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Get one request [complaints.view_own]",
+          "request": {
+            "method": "GET",
+            "url": "{{complaintsUrl}}/requests/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        },
+        {
+          "name": "Edit request [complaints.create + owner only]",
+          "request": {
+            "method": "PATCH",
+            "url": "{{complaintsUrl}}/requests/1",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Updated subject\",\n  \"description\": \"Updated description\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Assign request [complaints.assign]",
+          "request": {
+            "method": "PATCH",
+            "url": "{{complaintsUrl}}/requests/1/assign",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assignedToUserId\": 2\n}"
+            }
+          }
+        },
+        {
+          "name": "Respond to request [complaints.respond]",
+          "request": {
+            "method": "PATCH",
+            "url": "{{complaintsUrl}}/requests/1/respond",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"response\": \"We have dispatched a repair team. Expected fix within 48 hours.\",\n  \"status\": \"resolved\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Delete request [complaints.delete]",
+          "request": {
+            "method": "DELETE",
+            "url": "{{complaintsUrl}}/requests/1",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+          }
+        }
+      ]
+    }
+  ]
+}
