@@ -1,7 +1,9 @@
 import { Type } from 'class-transformer';
 import {
+  IsDefined,
   IsEnum,
   IsInt,
+  IsObject,
   IsOptional,
   IsString,
   ValidateNested,
@@ -10,7 +12,11 @@ import { CreateCitizenDto } from '../../citizens/dto/create-citizen.dto';
 import { RequestType } from '../entities/request.entity';
 
 export class CreateRequestDto {
-  // Citizen info — first/last name, email, phone, address, national number
+  // Citizen info — first/last name, email, phone, address, national number.
+  // IsDefined + IsObject make the nested object required (ValidateNested alone
+  // passes when `citizen` is missing).
+  @IsDefined()
+  @IsObject()
   @ValidateNested()
   @Type(() => CreateCitizenDto)
   citizen!: CreateCitizenDto;
