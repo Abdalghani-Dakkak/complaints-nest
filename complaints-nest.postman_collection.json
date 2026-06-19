@@ -2,29 +2,214 @@
   "info": {
     "name": "Complaints Nest API",
     "_postman_id": "complaints-nest-collection",
+    "description": "Requests & Complaints system integrated with IAM.\n\nRUN ORDER (top to bottom):\n1. '0 - IAM Setup (run once)' — creates the complaints.* permissions + the complaints.admin role in IAM, then assign it to a user. Needs an IAM ADMIN account.\n2. '1 - Auth' — log in as a complaints.admin user; saves {{token}}.\n3. '2 - Categories' — create a category (saves {{categoryId}}).\n4. '3 - Requests' — public submit (saves {{requestId}}), public lookup, then staff view/assign/respond/delete.\n\nMost IDs are captured automatically by test scripts into collection variables.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "iamUrl",        "value": "https://iam-nest-wr3k.onrender.com" },
-    { "key": "complaintsUrl", "value": "https://complaints-nest.onrender.com" },
-    { "key": "token",         "value": "" }
+    { "key": "iamUrl",         "value": "https://iam-nest-wr3k.onrender.com" },
+    { "key": "complaintsUrl",  "value": "https://complaints-nest.onrender.com" },
+    { "key": "iamToken",       "value": "" },
+    { "key": "token",          "value": "" },
+    { "key": "permIds",        "value": "[]" },
+    { "key": "roleId",         "value": "" },
+    { "key": "userId",         "value": "1" },
+    { "key": "categoryId",     "value": "1" },
+    { "key": "requestId",      "value": "1" },
+    { "key": "nationalNumber", "value": "400123456" }
   ],
   "item": [
     {
-      "name": "0 - Auth",
+      "name": "0 - IAM Setup (run once)",
+      "description": "Creates the complaints permissions + role in IAM. Run these top-to-bottom ONCE with an IAM admin account. Re-running create-permission/role returns 409 (already exists) — that's fine.",
       "item": [
         {
-          "name": "Login (complaints.admin only)",
+          "name": "IAM Login (admin) -> saves iamToken",
           "event": [
             {
               "listen": "test",
               "script": {
                 "exec": [
                   "const res = pm.response.json();",
-                  "if (res.access_token) {",
-                  "  pm.collectionVariables.set('token', res.access_token);",
-                  "  console.log('Token saved');",
-                  "}"
+                  "if (res.access_token) pm.collectionVariables.set('iamToken', res.access_token);",
+                  "pm.collectionVariables.set('permIds', '[]');",
+                  "console.log('IAM admin token saved; permIds reset');"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{iamUrl}}/auth/login",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ADMIN_EMAIL_HERE\",\n  \"password\": \"ADMIN_PASSWORD_HERE\"\n}"
+            },
+            "description": "Log in as an existing IAM admin (any user allowed to create permissions/roles)."
+          }
+        },
+        {
+          "name": "Create permission: complaints.view_all",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const id = pm.response.json().id;",
+                  "if (id) { const ids = JSON.parse(pm.collectionVariables.get('permIds') || '[]'); ids.push(id); pm.collectionVariables.set('permIds', JSON.stringify(ids)); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{iamUrl}}/permissions",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{iamToken}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"complaints.view_all\",\n  \"label\": \"View all complaints\",\n  \"description\": \"See every request/complaint\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create permission: complaints.assign",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const id = pm.response.json().id;",
+                  "if (id) { const ids = JSON.parse(pm.collectionVariables.get('permIds') || '[]'); ids.push(id); pm.collectionVariables.set('permIds', JSON.stringify(ids)); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{iamUrl}}/permissions",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{iamToken}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"complaints.assign\",\n  \"label\": \"Assign complaints\",\n  \"description\": \"Assign a request to a staff member\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create permission: complaints.respond",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const id = pm.response.json().id;",
+                  "if (id) { const ids = JSON.parse(pm.collectionVariables.get('permIds') || '[]'); ids.push(id); pm.collectionVariables.set('permIds', JSON.stringify(ids)); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{iamUrl}}/permissions",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{iamToken}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"complaints.respond\",\n  \"label\": \"Respond to complaints\",\n  \"description\": \"Reply + change status (emails the citizen)\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create permission: complaints.delete",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const id = pm.response.json().id;",
+                  "if (id) { const ids = JSON.parse(pm.collectionVariables.get('permIds') || '[]'); ids.push(id); pm.collectionVariables.set('permIds', JSON.stringify(ids)); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{iamUrl}}/permissions",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{iamToken}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"complaints.delete\",\n  \"label\": \"Delete + manage categories\",\n  \"description\": \"Delete requests and manage categories\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create role: complaints.admin -> saves roleId",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const id = pm.response.json().id;",
+                  "if (id) pm.collectionVariables.set('roleId', id);",
+                  "console.log('complaints.admin roleId =', id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{iamUrl}}/roles",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{iamToken}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"complaints.admin\",\n  \"label\": \"Complaints Admin\",\n  \"description\": \"Staff who manage the complaints system\",\n  \"permissionIds\": {{permIds}}\n}"
+            },
+            "description": "Uses {{permIds}} captured from the 4 create-permission requests above."
+          }
+        },
+        {
+          "name": "Assign complaints.admin to a user",
+          "request": {
+            "method": "PATCH",
+            "url": "{{iamUrl}}/users/{{userId}}",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{iamToken}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleId\": {{roleId}}\n}"
+            },
+            "description": "Set {{userId}} (collection variable) to the IAM user who should access complaints. After this, that user's complaints login will succeed."
+          }
+        }
+      ]
+    },
+    {
+      "name": "1 - Auth",
+      "item": [
+        {
+          "name": "Login (complaints.admin only) -> saves token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.access_token) { pm.collectionVariables.set('token', res.access_token); console.log('Token saved'); }"
                 ]
               }
             }
@@ -36,13 +221,14 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"your@email.com\",\n  \"password\": \"yourpassword\"\n}"
-            }
+            },
+            "description": "Proxies to IAM. Returns a token ONLY if the user's role is complaints.admin; otherwise 401."
           }
         }
       ]
     },
     {
-      "name": "1 - Categories",
+      "name": "2 - Categories",
       "item": [
         {
           "name": "Get all categories",
@@ -56,12 +242,24 @@
           "name": "Get one category",
           "request": {
             "method": "GET",
-            "url": "{{complaintsUrl}}/categories/1",
+            "url": "{{complaintsUrl}}/categories/{{categoryId}}",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
           }
         },
         {
-          "name": "Create category [complaints.delete]",
+          "name": "Create category [complaints.delete] -> saves categoryId",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const id = pm.response.json().id;",
+                  "if (id) pm.collectionVariables.set('categoryId', id);",
+                  "console.log('categoryId =', id);"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "url": "{{complaintsUrl}}/categories",
@@ -79,7 +277,7 @@
           "name": "Update category [complaints.delete]",
           "request": {
             "method": "PATCH",
-            "url": "{{complaintsUrl}}/categories/1",
+            "url": "{{complaintsUrl}}/categories/{{categoryId}}",
             "header": [
               { "key": "Authorization", "value": "Bearer {{token}}" },
               { "key": "Content-Type",  "value": "application/json" }
@@ -94,34 +292,46 @@
           "name": "Delete category [complaints.delete]",
           "request": {
             "method": "DELETE",
-            "url": "{{complaintsUrl}}/categories/1",
+            "url": "{{complaintsUrl}}/categories/{{categoryId}}",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
           }
         }
       ]
     },
     {
-      "name": "2 - Requests",
+      "name": "3 - Requests",
       "item": [
         {
-          "name": "Submit request [PUBLIC — no token]",
+          "name": "Submit request [PUBLIC — no token] -> saves requestId",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const id = pm.response.json().id;",
+                  "if (id) pm.collectionVariables.set('requestId', id);",
+                  "console.log('requestId =', id);"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "url": "{{complaintsUrl}}/requests",
-            "header": [
-              { "key": "Content-Type",  "value": "application/json" }
-            ],
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"citizen\": {\n    \"firstName\": \"Ahmad\",\n    \"lastName\": \"Khalil\",\n    \"email\": \"ahmad@example.com\",\n    \"phone\": \"0590000000\",\n    \"address\": \"Gaza, Al-Rimal\",\n    \"nationalNumber\": \"400123456\"\n  },\n  \"categoryId\": 1,\n  \"type\": \"complaint\",\n  \"description\": \"The road has a large pothole causing accidents\"\n}"
-            }
+              "raw": "{\n  \"citizen\": {\n    \"firstName\": \"Ahmad\",\n    \"lastName\": \"Khalil\",\n    \"email\": \"PUT_A_REAL_EMAIL_HERE@example.com\",\n    \"phone\": \"0590000000\",\n    \"address\": \"Gaza, Al-Rimal\",\n    \"nationalNumber\": \"{{nationalNumber}}\"\n  },\n  \"categoryId\": {{categoryId}},\n  \"type\": \"complaint\",\n  \"description\": \"The road has a large pothole causing accidents\"\n}"
+            },
+            "description": "Public — no token. Citizen is upserted by nationalNumber. Use a REAL email if you want to receive the response email later."
           }
         },
         {
           "name": "Get my requests by national number [PUBLIC — no token]",
           "request": {
             "method": "GET",
-            "url": "{{complaintsUrl}}/requests/my?nationalNumber=400123456"
+            "url": "{{complaintsUrl}}/requests/my?nationalNumber={{nationalNumber}}",
+            "description": "Public lookup. Returns [] for an unknown national number."
           }
         },
         {
@@ -136,7 +346,7 @@
           "name": "Get one request [complaints.view_all]",
           "request": {
             "method": "GET",
-            "url": "{{complaintsUrl}}/requests/1",
+            "url": "{{complaintsUrl}}/requests/{{requestId}}",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
           }
         },
@@ -144,7 +354,7 @@
           "name": "Assign request [complaints.assign]",
           "request": {
             "method": "PATCH",
-            "url": "{{complaintsUrl}}/requests/1/assign",
+            "url": "{{complaintsUrl}}/requests/{{requestId}}/assign",
             "header": [
               { "key": "Authorization", "value": "Bearer {{token}}" },
               { "key": "Content-Type",  "value": "application/json" }
@@ -152,14 +362,15 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"assignedToUserId\": 2\n}"
-            }
+            },
+            "description": "assignedToUserId is an IAM staff user id; sets status to in_progress."
           }
         },
         {
-          "name": "Respond to request [complaints.respond]",
+          "name": "Respond to request [complaints.respond] — EMAILS the citizen",
           "request": {
             "method": "PATCH",
-            "url": "{{complaintsUrl}}/requests/1/respond",
+            "url": "{{complaintsUrl}}/requests/{{requestId}}/respond",
             "header": [
               { "key": "Authorization", "value": "Bearer {{token}}" },
               { "key": "Content-Type",  "value": "application/json" }
@@ -167,14 +378,15 @@
             "body": {
               "mode": "raw",
               "raw": "{\n  \"response\": \"We have dispatched a repair team. Expected fix within 48 hours.\",\n  \"status\": \"resolved\"\n}"
-            }
+            },
+            "description": "Saves the response + status AND emails the citizen (the email on the linked citizen record) via SMTP."
           }
         },
         {
           "name": "Delete request [complaints.delete]",
           "request": {
             "method": "DELETE",
-            "url": "{{complaintsUrl}}/requests/1",
+            "url": "{{complaintsUrl}}/requests/{{requestId}}",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
           }
         }
