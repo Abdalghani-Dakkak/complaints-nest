@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ComplaintRequest, RequestStatus } from './entities/request.entity';
 import { CreateRequestDto } from './dto/create-request.dto';
-import { AssignRequestDto } from './dto/assign-request.dto';
 import { RespondRequestDto } from './dto/respond-request.dto';
 import { CategoriesService } from '../categories/categories.service';
 import { CitizensService } from '../citizens/citizens.service';
@@ -58,13 +57,6 @@ export class RequestsService {
     });
     if (!request) throw new NotFoundException(`Request #${id} not found`);
     return request;
-  }
-
-  async assign(id: number, dto: AssignRequestDto): Promise<ComplaintRequest> {
-    const request = await this.findOne(id);
-    request.assignedToUserId = dto.assignedToUserId;
-    request.status = RequestStatus.IN_PROGRESS;
-    return this.repo.save(request);
   }
 
   async respond(id: number, dto: RespondRequestDto): Promise<ComplaintRequest> {

@@ -75,32 +75,6 @@
           }
         },
         {
-          "name": "Create permission: complaints.assign",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "const id = pm.response.json().id;",
-                  "if (id) { const ids = JSON.parse(pm.collectionVariables.get('permIds') || '[]'); ids.push(id); pm.collectionVariables.set('permIds', JSON.stringify(ids)); }"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "url": "{{iamUrl}}/permissions",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{iamToken}}" },
-              { "key": "Content-Type",  "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"complaints.assign\",\n  \"label\": \"Assign complaints\",\n  \"description\": \"Assign a request to a staff member\"\n}"
-            }
-          }
-        },
-        {
           "name": "Create permission: complaints.respond",
           "event": [
             {
@@ -332,22 +306,6 @@
             "method": "GET",
             "url": "{{complaintsUrl}}/requests",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
-          }
-        },
-        {
-          "name": "Assign request [complaints.assign]",
-          "request": {
-            "method": "PATCH",
-            "url": "{{complaintsUrl}}/requests/{{requestId}}/assign",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type",  "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"assignedToUserId\": 2\n}"
-            },
-            "description": "assignedToUserId is an IAM staff user id; sets status to in_progress."
           }
         },
         {

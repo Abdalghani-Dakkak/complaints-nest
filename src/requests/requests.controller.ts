@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { RequestsService } from './requests.service';
 import { CreateRequestDto } from './dto/create-request.dto';
-import { AssignRequestDto } from './dto/assign-request.dto';
 import { RespondRequestDto } from './dto/respond-request.dto';
 import { MyRequestsQueryDto } from './dto/my-requests-query.dto';
 import { RequirePermission } from '../auth/require-permission.decorator';
@@ -40,12 +39,6 @@ export class RequestsController {
   @RequirePermission('complaints.view_all')
   findAll() {
     return this.service.findAll();
-  }
-
-  @Patch(':id/assign')
-  @RequirePermission('complaints.assign')
-  assign(@Param('id', ParseIntPipe) id: number, @Body() dto: AssignRequestDto) {
-    return this.service.assign(id, dto);
   }
 
   // Responds and emails the citizen.
