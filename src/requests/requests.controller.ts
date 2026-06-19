@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -11,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { RequestsService } from './requests.service';
 import { CreateRequestDto } from './dto/create-request.dto';
-import { AssignRequestDto } from './dto/assign-request.dto';
 import { RespondRequestDto } from './dto/respond-request.dto';
 import { MyRequestsQueryDto } from './dto/my-requests-query.dto';
 import { RequirePermission } from '../auth/require-permission.decorator';
@@ -29,7 +27,6 @@ export class RequestsController {
   }
 
   // PUBLIC — a citizen looks up their own requests by national number.
-  // Declared before :id so "my" isn't captured by the :id route.
   @Get('my')
   @Public()
   findMine(@Query() query: MyRequestsQueryDto) {
@@ -43,18 +40,7 @@ export class RequestsController {
     return this.service.findAll();
   }
 
-  @Get(':id')
-  @RequirePermission('complaints.view_all')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.service.findOne(id);
-  }
-
-  @Patch(':id/assign')
-  @RequirePermission('complaints.assign')
-  assign(@Param('id', ParseIntPipe) id: number, @Body() dto: AssignRequestDto) {
-    return this.service.assign(id, dto);
-  }
-
+  // Staff — respond to a request (also emails the citizen).
   @Patch(':id/respond')
   @RequirePermission('complaints.respond')
   respond(
@@ -62,11 +48,5 @@ export class RequestsController {
     @Body() dto: RespondRequestDto,
   ) {
     return this.service.respond(id, dto);
-  }
-
-  @Delete(':id')
-  @RequirePermission('complaints.delete')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.service.remove(id);
   }
 }

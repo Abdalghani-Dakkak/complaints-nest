@@ -239,14 +239,6 @@
           }
         },
         {
-          "name": "Get one category",
-          "request": {
-            "method": "GET",
-            "url": "{{complaintsUrl}}/categories/{{categoryId}}",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
-          }
-        },
-        {
           "name": "Create category [complaints.delete] -> saves categoryId",
           "event": [
             {
@@ -271,29 +263,6 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"Infrastructure\",\n  \"arabicName\": \"البنية التحتية\",\n  \"description\": \"Roads, electricity, water\"\n}"
             }
-          }
-        },
-        {
-          "name": "Update category [complaints.delete]",
-          "request": {
-            "method": "PATCH",
-            "url": "{{complaintsUrl}}/categories/{{categoryId}}",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type",  "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"isActive\": false\n}"
-            }
-          }
-        },
-        {
-          "name": "Delete category [complaints.delete]",
-          "request": {
-            "method": "DELETE",
-            "url": "{{complaintsUrl}}/categories/{{categoryId}}",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
           }
         }
       ]
@@ -343,30 +312,6 @@
           }
         },
         {
-          "name": "Get one request [complaints.view_all]",
-          "request": {
-            "method": "GET",
-            "url": "{{complaintsUrl}}/requests/{{requestId}}",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
-          }
-        },
-        {
-          "name": "Assign request [complaints.assign]",
-          "request": {
-            "method": "PATCH",
-            "url": "{{complaintsUrl}}/requests/{{requestId}}/assign",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type",  "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"assignedToUserId\": 2\n}"
-            },
-            "description": "assignedToUserId is an IAM staff user id; sets status to in_progress."
-          }
-        },
-        {
           "name": "Respond to request [complaints.respond] — EMAILS the citizen",
           "request": {
             "method": "PATCH",
@@ -380,14 +325,6 @@
               "raw": "{\n  \"response\": \"We have dispatched a repair team. Expected fix within 48 hours.\",\n  \"status\": \"resolved\"\n}"
             },
             "description": "Saves the response + status AND emails the citizen (the email on the linked citizen record) via SMTP."
-          }
-        },
-        {
-          "name": "Delete request [complaints.delete]",
-          "request": {
-            "method": "DELETE",
-            "url": "{{complaintsUrl}}/requests/{{requestId}}",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
           }
         }
       ]
