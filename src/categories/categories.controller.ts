@@ -12,6 +12,7 @@ import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { RequirePermission } from '../auth/require-permission.decorator';
+import { Public } from '../auth/public.decorator';
 
 @Controller('categories')
 export class CategoriesController {
@@ -23,7 +24,9 @@ export class CategoriesController {
     return this.service.create(dto);
   }
 
+  // PUBLIC — citizens need the category list to submit a request.
   @Get()
+  @Public()
   findAll() {
     return this.service.findAll();
   }

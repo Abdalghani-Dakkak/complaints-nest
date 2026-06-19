@@ -283,11 +283,11 @@
       "name": "2 - Categories",
       "item": [
         {
-          "name": "Get all categories",
+          "name": "Get all categories [PUBLIC — no token]",
           "request": {
             "method": "GET",
             "url": "{{complaintsUrl}}/categories",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
+            "description": "Public — citizens fetch the category list to fill the submit form."
           }
         },
         {
