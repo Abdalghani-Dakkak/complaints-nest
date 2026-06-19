@@ -39,6 +39,16 @@ export class RequestsService {
     });
   }
 
+  // Public lookup: a citizen retrieves their own requests by national number.
+  // Returns [] for an unknown national number (no existence leak, no 404).
+  findByCitizen(nationalNumber: string): Promise<ComplaintRequest[]> {
+    return this.repo.find({
+      where: { citizen: { nationalNumber } },
+      relations: { category: true },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async findOne(id: number): Promise<ComplaintRequest> {
     const request = await this.repo.findOne({
       where: { id },

@@ -118,6 +118,13 @@
           }
         },
         {
+          "name": "Get my requests by national number [PUBLIC — no token]",
+          "request": {
+            "method": "GET",
+            "url": "{{complaintsUrl}}/requests/my?nationalNumber=400123456"
+          }
+        },
+        {
           "name": "Get all requests [complaints.view_all]",
           "request": {
             "method": "GET",
