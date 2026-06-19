@@ -18,7 +18,7 @@ export class CategoriesController {
   constructor(private readonly service: CategoriesService) {}
 
   @Post()
-  @RequirePermission('complaints.delete')
+  @RequirePermission('complaints.categories.create')
   create(@Body() dto: CreateCategoryDto) {
     return this.service.create(dto);
   }
@@ -29,13 +29,13 @@ export class CategoriesController {
   }
 
   @Patch(':id')
-  @RequirePermission('complaints.delete')
+  @RequirePermission('complaints.categories.update')
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateCategoryDto) {
     return this.service.update(id, dto);
   }
 
   @Delete(':id')
-  @RequirePermission('complaints.delete')
+  @RequirePermission('complaints.categories.delete')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.service.remove(id);
   }

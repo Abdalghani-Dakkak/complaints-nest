@@ -49,7 +49,7 @@
           }
         },
         {
-          "name": "Create permission: complaints.view_all",
+          "name": "Create permission: complaints.categories.create",
           "event": [
             {
               "listen": "test",
@@ -70,12 +70,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"complaints.view_all\",\n  \"label\": \"View all complaints\",\n  \"description\": \"See every request/complaint\"\n}"
+              "raw": "{\n  \"name\": \"complaints.categories.create\",\n  \"label\": \"Create categories\",\n  \"description\": \"Create a complaints category\"\n}"
             }
           }
         },
         {
-          "name": "Create permission: complaints.respond",
+          "name": "Create permission: complaints.categories.update",
           "event": [
             {
               "listen": "test",
@@ -96,12 +96,12 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"complaints.respond\",\n  \"label\": \"Respond to complaints\",\n  \"description\": \"Reply + change status (emails the citizen)\"\n}"
+              "raw": "{\n  \"name\": \"complaints.categories.update\",\n  \"label\": \"Update categories\",\n  \"description\": \"Update a complaints category\"\n}"
             }
           }
         },
         {
-          "name": "Create permission: complaints.delete",
+          "name": "Create permission: complaints.categories.delete",
           "event": [
             {
               "listen": "test",
@@ -122,7 +122,85 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"complaints.delete\",\n  \"label\": \"Delete + manage categories\",\n  \"description\": \"Delete requests and manage categories\"\n}"
+              "raw": "{\n  \"name\": \"complaints.categories.delete\",\n  \"label\": \"Delete categories\",\n  \"description\": \"Delete a complaints category\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create permission: complaints.requests.view_all",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const id = pm.response.json().id;",
+                  "if (id) { const ids = JSON.parse(pm.collectionVariables.get('permIds') || '[]'); ids.push(id); pm.collectionVariables.set('permIds', JSON.stringify(ids)); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{iamUrl}}/permissions",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{iamToken}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"complaints.requests.view_all\",\n  \"label\": \"View all requests\",\n  \"description\": \"See every request/complaint\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create permission: complaints.requests.respond",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const id = pm.response.json().id;",
+                  "if (id) { const ids = JSON.parse(pm.collectionVariables.get('permIds') || '[]'); ids.push(id); pm.collectionVariables.set('permIds', JSON.stringify(ids)); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{iamUrl}}/permissions",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{iamToken}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"complaints.requests.respond\",\n  \"label\": \"Respond to requests\",\n  \"description\": \"Reply + change status (emails the citizen)\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Create permission: complaints.requests.delete",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const id = pm.response.json().id;",
+                  "if (id) { const ids = JSON.parse(pm.collectionVariables.get('permIds') || '[]'); ids.push(id); pm.collectionVariables.set('permIds', JSON.stringify(ids)); }"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "url": "{{iamUrl}}/permissions",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{iamToken}}" },
+              { "key": "Content-Type",  "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"complaints.requests.delete\",\n  \"label\": \"Delete requests\",\n  \"description\": \"Delete a request\"\n}"
             }
           }
         },
@@ -151,7 +229,7 @@
               "mode": "raw",
               "raw": "{\n  \"name\": \"complaints.admin\",\n  \"label\": \"Complaints Admin\",\n  \"description\": \"Staff who manage the complaints system\",\n  \"permissionIds\": {{permIds}}\n}"
             },
-            "description": "Uses {{permIds}} captured from the 4 create-permission requests above."
+            "description": "Uses {{permIds}} captured from the 6 create-permission requests above."
           }
         },
         {
@@ -213,7 +291,7 @@
           }
         },
         {
-          "name": "Create category [complaints.delete] -> saves categoryId",
+          "name": "Create category [complaints.categories.create] -> saves categoryId",
           "event": [
             {
               "listen": "test",
@@ -240,7 +318,7 @@
           }
         },
         {
-          "name": "Update category [complaints.delete]",
+          "name": "Update category [complaints.categories.update]",
           "request": {
             "method": "PATCH",
             "url": "{{complaintsUrl}}/categories/{{categoryId}}",
@@ -255,7 +333,7 @@
           }
         },
         {
-          "name": "Delete category [complaints.delete]",
+          "name": "Delete category [complaints.categories.delete]",
           "request": {
             "method": "DELETE",
             "url": "{{complaintsUrl}}/categories/{{categoryId}}",
@@ -301,7 +379,7 @@
           }
         },
         {
-          "name": "Get all requests [complaints.view_all]",
+          "name": "Get all requests [complaints.requests.view_all]",
           "request": {
             "method": "GET",
             "url": "{{complaintsUrl}}/requests",
@@ -309,7 +387,7 @@
           }
         },
         {
-          "name": "Respond to request [complaints.respond] — EMAILS the citizen",
+          "name": "Respond to request [complaints.requests.respond] — EMAILS the citizen",
           "request": {
             "method": "PATCH",
             "url": "{{complaintsUrl}}/requests/{{requestId}}/respond",
@@ -325,7 +403,7 @@
           }
         },
         {
-          "name": "Delete request [complaints.delete]",
+          "name": "Delete request [complaints.requests.delete]",
           "request": {
             "method": "DELETE",
             "url": "{{complaintsUrl}}/requests/{{requestId}}",

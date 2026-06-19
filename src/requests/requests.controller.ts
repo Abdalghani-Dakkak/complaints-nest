@@ -36,14 +36,14 @@ export class RequestsController {
 
   // Staff (complaints.admin) — list all requests with citizen + category.
   @Get()
-  @RequirePermission('complaints.view_all')
+  @RequirePermission('complaints.requests.view_all')
   findAll() {
     return this.service.findAll();
   }
 
   // Responds and emails the citizen.
   @Patch(':id/respond')
-  @RequirePermission('complaints.respond')
+  @RequirePermission('complaints.requests.respond')
   respond(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: RespondRequestDto,
@@ -52,7 +52,7 @@ export class RequestsController {
   }
 
   @Delete(':id')
-  @RequirePermission('complaints.delete')
+  @RequirePermission('complaints.requests.delete')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.service.remove(id);
   }
