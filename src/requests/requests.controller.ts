@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -10,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { RequestsService } from './requests.service';
 import { CreateRequestDto } from './dto/create-request.dto';
+import { AssignRequestDto } from './dto/assign-request.dto';
 import { RespondRequestDto } from './dto/respond-request.dto';
 import { MyRequestsQueryDto } from './dto/my-requests-query.dto';
 import { RequirePermission } from '../auth/require-permission.decorator';
@@ -40,7 +42,13 @@ export class RequestsController {
     return this.service.findAll();
   }
 
-  // Staff — respond to a request (also emails the citizen).
+  @Patch(':id/assign')
+  @RequirePermission('complaints.assign')
+  assign(@Param('id', ParseIntPipe) id: number, @Body() dto: AssignRequestDto) {
+    return this.service.assign(id, dto);
+  }
+
+  // Responds and emails the citizen.
   @Patch(':id/respond')
   @RequirePermission('complaints.respond')
   respond(
@@ -48,5 +56,11 @@ export class RequestsController {
     @Body() dto: RespondRequestDto,
   ) {
     return this.service.respond(id, dto);
+  }
+
+  @Delete(':id')
+  @RequirePermission('complaints.delete')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.service.remove(id);
   }
 }
