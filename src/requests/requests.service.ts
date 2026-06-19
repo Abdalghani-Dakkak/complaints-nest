@@ -7,6 +7,7 @@ import { AssignRequestDto } from './dto/assign-request.dto';
 import { RespondRequestDto } from './dto/respond-request.dto';
 import { CategoriesService } from '../categories/categories.service';
 import { CitizensService } from '../citizens/citizens.service';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class RequestsService {
@@ -15,6 +16,7 @@ export class RequestsService {
     private readonly repo: Repository<ComplaintRequest>,
     private readonly categoriesService: CategoriesService,
     private readonly citizensService: CitizensService,
+    private readonly mailService: MailService,
   ) {}
 
   // Public submission: upsert the citizen (by national number), then file the request.
@@ -66,10 +68,16 @@ export class RequestsService {
   }
 
   async respond(id: number, dto: RespondRequestDto): Promise<ComplaintRequest> {
-    const request = await this.findOne(id);
+    const request = await this.findOne(id); // includes citizen relation
     request.response = dto.response;
     request.status = dto.status ?? RequestStatus.RESOLVED;
-    return this.repo.save(request);
+    const saved = await this.repo.save(request);
+    await this.mailService.sendRequestResponse(
+      request.citizen,
+      saved,
+      dto.response,
+    );
+    return saved;
   }
 
   async remove(id: number): Promise<void> {
