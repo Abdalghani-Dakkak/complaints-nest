@@ -8,6 +8,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Category } from '../../categories/entities/category.entity';
+import { Citizen } from '../../citizens/entities/citizen.entity';
 
 export enum RequestStatus {
   PENDING = 'pending',
@@ -26,6 +27,18 @@ export class ComplaintRequest {
   @PrimaryGeneratedColumn()
   id!: number;
 
+  // Relation to the citizen BY NATIONAL NUMBER: the FK column
+  // `citizen_national_number` references citizens.national_number (a unique key).
+  @ManyToOne(() => Citizen, (c) => c.requests, {
+    nullable: false,
+    onDelete: 'RESTRICT',
+  })
+  @JoinColumn({
+    name: 'citizen_national_number',
+    referencedColumnName: 'nationalNumber',
+  })
+  citizen!: Citizen;
+
   @ManyToOne(() => Category, (c) => c.requests, {
     nullable: false,
     onDelete: 'RESTRICT',
@@ -33,11 +46,8 @@ export class ComplaintRequest {
   @JoinColumn({ name: 'category_id' })
   category!: Category;
 
-  @Column({ type: 'enum', enum: RequestType, default: RequestType.REQUEST })
+  @Column({ type: 'enum', enum: RequestType, default: RequestType.COMPLAINT })
   type!: RequestType;
-
-  @Column()
-  subject!: string;
 
   @Column({ type: 'text' })
   description!: string;
@@ -49,9 +59,7 @@ export class ComplaintRequest {
   })
   status!: RequestStatus;
 
-  @Column({ name: 'submitter_user_id' })
-  submitterUserId!: number;
-
+  // The IAM staff user (complaints.admin) handling this request — set on assign.
   @Column({ name: 'assigned_to_user_id', nullable: true })
   assignedToUserId!: number;
 

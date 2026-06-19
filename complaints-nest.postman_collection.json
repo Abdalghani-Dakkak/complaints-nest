@@ -6,7 +6,7 @@
   },
   "variable": [
     { "key": "iamUrl",        "value": "https://iam-nest-wr3k.onrender.com" },
-    { "key": "complaintsUrl", "value": "http://localhost:3001" },
+    { "key": "complaintsUrl", "value": "https://complaints-nest.onrender.com" },
     { "key": "token",         "value": "" }
   ],
   "item": [
@@ -104,17 +104,16 @@
       "name": "2 - Requests",
       "item": [
         {
-          "name": "Submit request [complaints.create]",
+          "name": "Submit request [PUBLIC — no token]",
           "request": {
             "method": "POST",
             "url": "{{complaintsUrl}}/requests",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
               { "key": "Content-Type",  "value": "application/json" }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"categoryId\": 1,\n  \"type\": \"complaint\",\n  \"subject\": \"Broken road near main street\",\n  \"description\": \"The road has a large pothole causing accidents\"\n}"
+              "raw": "{\n  \"citizen\": {\n    \"firstName\": \"Ahmad\",\n    \"lastName\": \"Khalil\",\n    \"email\": \"ahmad@example.com\",\n    \"phone\": \"0590000000\",\n    \"address\": \"Gaza, Al-Rimal\",\n    \"nationalNumber\": \"400123456\"\n  },\n  \"categoryId\": 1,\n  \"type\": \"complaint\",\n  \"description\": \"The road has a large pothole causing accidents\"\n}"
             }
           }
         },
@@ -127,34 +126,11 @@
           }
         },
         {
-          "name": "Get my requests [complaints.view_own]",
-          "request": {
-            "method": "GET",
-            "url": "{{complaintsUrl}}/requests/my",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
-          }
-        },
-        {
-          "name": "Get one request [complaints.view_own]",
+          "name": "Get one request [complaints.view_all]",
           "request": {
             "method": "GET",
             "url": "{{complaintsUrl}}/requests/1",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }]
-          }
-        },
-        {
-          "name": "Edit request [complaints.create + owner only]",
-          "request": {
-            "method": "PATCH",
-            "url": "{{complaintsUrl}}/requests/1",
-            "header": [
-              { "key": "Authorization", "value": "Bearer {{token}}" },
-              { "key": "Content-Type",  "value": "application/json" }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"subject\": \"Updated subject\",\n  \"description\": \"Updated description\"\n}"
-            }
           }
         },
         {
