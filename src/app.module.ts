@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { CategoriesModule } from './categories/categories.module';
 import { RequestsModule } from './requests/requests.module';
 import { CitizensModule } from './citizens/citizens.module';
+import { LoggingModule } from './logging/logging.module';
 import { Category } from './categories/entities/category.entity';
 import { ComplaintRequest } from './requests/entities/request.entity';
 import { Citizen } from './citizens/entities/citizen.entity';
@@ -31,6 +32,7 @@ import { HealthController } from './health.controller';
     CategoriesModule,
     CitizensModule,
     RequestsModule,
+    LoggingModule,
   ],
   controllers: [HealthController],
 })
