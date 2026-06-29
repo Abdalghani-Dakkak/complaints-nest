@@ -7,6 +7,12 @@ export interface IamLogPayload {
   state?: 'success' | 'failure';
   department?: string;
   description?: string;
+  ipAddress?: string;
+  userAgent?: string;
+  method?: string;
+  path?: string;
+  statusCode?: number;
+  metadata?: Record<string, unknown>;
 }
 
 /**

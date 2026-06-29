@@ -27,24 +27,37 @@ export class IamLoggingInterceptor implements NestInterceptor {
       return next.handle();
     }
 
+    const res = context.switchToHttp().getResponse();
     const routePath = req.route?.path || url.split('?')[0];
     const procedureType = `complaints ${method} ${routePath}`.slice(0, 100);
     const userId: number | undefined = req.user?.sub;
+    const ipAddress: string | undefined =
+      (req.headers?.['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+      req.ip;
+    const userAgent: string | undefined = req.headers?.['user-agent'];
+    const base = {
+      userId,
+      procedureType,
+      ipAddress,
+      userAgent,
+      method,
+      path: routePath,
+    };
 
     return next.handle().pipe(
       tap(() => {
         void this.iamLog.send({
-          userId,
-          procedureType,
+          ...base,
           state: 'success',
+          statusCode: res?.statusCode,
           description: `${method} ${url}`.slice(0, 500),
         });
       }),
       catchError((err) => {
         void this.iamLog.send({
-          userId,
-          procedureType,
+          ...base,
           state: 'failure',
+          statusCode: err?.status,
           description: `${method} ${url} -> ${err?.status ?? 'error'}`.slice(
             0,
             500,
