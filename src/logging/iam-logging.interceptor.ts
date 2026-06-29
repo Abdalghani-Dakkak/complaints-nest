@@ -35,6 +35,18 @@ export class IamLoggingInterceptor implements NestInterceptor {
       (req.headers?.['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
       req.ip;
     const userAgent: string | undefined = req.headers?.['user-agent'];
+
+    // Public actions (e.g. citizen submit) have no IAM user — capture the
+    // citizen's identity from the request body instead, into metadata.
+    const citizen = req.body?.citizen;
+    const hasCitizen =
+      userId === undefined && citizen && typeof citizen === 'object';
+    const who = hasCitizen
+      ? ` | citizen: ${[citizen.firstName, citizen.lastName]
+          .filter(Boolean)
+          .join(' ')} (${citizen.nationalNumber ?? ''})`
+      : '';
+
     const base = {
       userId,
       procedureType,
@@ -42,6 +54,7 @@ export class IamLoggingInterceptor implements NestInterceptor {
       userAgent,
       method,
       path: routePath,
+      ...(hasCitizen ? { metadata: { citizen } } : {}),
     };
 
     return next.handle().pipe(
@@ -50,7 +63,7 @@ export class IamLoggingInterceptor implements NestInterceptor {
           ...base,
           state: 'success',
           statusCode: res?.statusCode,
-          description: `${method} ${url}`.slice(0, 500),
+          description: `${method} ${url}${who}`.slice(0, 500),
         });
       }),
       catchError((err) => {
@@ -58,7 +71,7 @@ export class IamLoggingInterceptor implements NestInterceptor {
           ...base,
           state: 'failure',
           statusCode: err?.status,
-          description: `${method} ${url} -> ${err?.status ?? 'error'}`.slice(
+          description: `${method} ${url} -> ${err?.status ?? 'error'}${who}`.slice(
             0,
             500,
           ),
