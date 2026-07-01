@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import type { Request } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { Public } from './public.decorator';
 import type { JwtPayload } from './jwt-auth.guard';
 
@@ -13,6 +14,12 @@ export class AuthController {
   @Public()
   login(@Body() dto: LoginDto) {
     return this.service.login(dto);
+  }
+
+  @Post('refresh')
+  @Public()
+  refresh(@Body() dto: RefreshTokenDto) {
+    return this.service.refresh(dto);
   }
 
   @Get('permissions')
