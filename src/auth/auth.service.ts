@@ -1,7 +1,8 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
-import { COMPLAINTS_ROLE, JwtPayload } from './jwt-auth.guard';
+import { complaintsSystemId } from './constants';
+import { JwtPayload } from './jwt-auth.guard';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +26,7 @@ export class AuthService {
     }
 
     const payload = this.jwtService.decode<JwtPayload>(data.access_token);
-    if (!payload || payload.roleName !== COMPLAINTS_ROLE) {
+    if (!payload || payload.systemId !== complaintsSystemId) {
       throw new UnauthorizedException('Access denied: your role cannot access this system');
     }
 

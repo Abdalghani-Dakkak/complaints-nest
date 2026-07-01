@@ -7,9 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
-import { IS_PUBLIC_KEY, jwtConstants } from './constants';
-
-export const COMPLAINTS_ROLE = 'complaints.admin';
+import { complaintsSystemId, IS_PUBLIC_KEY, jwtConstants } from './constants';
 
 export interface JwtPayload {
   sub: number;
@@ -18,6 +16,7 @@ export interface JwtPayload {
   sid?: number;
   permissions?: string[];
   roleName?: string;
+  systemId?: number | null;
 }
 
 @Injectable()
@@ -43,7 +42,7 @@ export class JwtAuthGuard implements CanActivate {
         secret: jwtConstants.secret,
       });
 
-      if (payload.roleName !== COMPLAINTS_ROLE) {
+      if (payload.systemId !== complaintsSystemId) {
         throw new UnauthorizedException('Access denied: insufficient role');
       }
 
